@@ -8,7 +8,7 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name')}),
+        # (_('Personal info'), {'fields': ('first_name', 'last_name')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
@@ -21,9 +21,11 @@ class CustomUserAdmin(UserAdmin):
         }),
     )
 
-    list_display = ('email', 'first_name', 'last_name', 'is_staff')
-    search_fields = ('email', 'first_name', 'last_name')
-    ordering = ('email',)
+    search_fields = ("email",)
+    list_filter = ("is_active", "is_staff")
+    ordering = ("-date_joined",)
+    list_display = ("email", "is_active", "is_staff")
+
 
 admin.site.register(get_user_model(), CustomUserAdmin)
 # admin.site.register(CustomUser)
