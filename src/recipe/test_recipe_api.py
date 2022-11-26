@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from .models import Recipe, Tag
-from .serializers import RecipeSerializer, RecipeDetailsSerializer
+from .serializers import RecipeSerializer, RecipeDetailsSerializer, TagSerializer
 
 # Create your tests here.
 
@@ -27,7 +27,6 @@ def create_user(email="user@example.com", password="password123"):
     user = get_user_model().objects.create(email=email, password=password)
     user.set_password(user.password)
     return user
-
 
 
 def create_recipe(user, **params):  # sourcery skip: dict-assign-update-to-union
@@ -103,27 +102,44 @@ class PrivateRecipeAPITests(TestCase):
             "title": "Sample recipe title",
             "time_minutes": 22,
             "price": Decimal("5.25"),
-
         }
         response = self.client.post(RECIPE_LIST, payload)
-        recipe = Recipe.objects.get(id=response.data.get('id'))
+        recipe = Recipe.objects.get(id=response.data.get("id"))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         for key, value in payload.items():
             # comparing the value of recipe with the key of payload
             self.assertEqual((getattr(recipe, key)), value)
         self.assertEqual(recipe.user, self.user)
 
+    def test_create_recipe_with_new_tags(self):
+        """Test creating a new recipe with new tags."""
+        payload = {
+            "title": "Thai prawn curry",
+            "time_minutes": 30,
+            "price": Decimal("8.25"),
+            "tags": [{"title": "Thai"}, {"title": "Dinner"}],
+        }
+        response = self.client.post(RECIPE_LIST, payload, format="json")
 
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        recipes = Recipe.objects.filter(user=self.user)
+        self.assertEqual(recipes.count(), 1)
 
-class TagAPITests(TestCase):
+    def test_create_recipe_with_existing_tags(self):
+        """Test creating a new recipe with existing tags."""
+        tag_indian = Tag.objects.create(user=self.user, title="Indian")
+        payload = {
+            "title": "Pongal",
+            "time_minutes": 60,
+            "price": Decimal("4.50"),
+            "tags": [{"title": "Indian"}, {"title": "Breakfast"}],
+        }
 
-    def setUp(self) -> None:
-        self.user = create_user()
-        self.client = APIClient()
+        response = self.client.post(RECIPE_LIST, payload, format="json")
 
-    def test_create_tag(self):
-        title = "example tag1"
-        user = self.user
-        tag = Tag.objects.create(user=user, title=title)
-        self.assertEqual(tag.title, title)
-
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        recipes = Recipe.objects.filter(user=self.user)
+        self.assertEqual(recipes.count(), 1)
+        recipe =recipes[0]
+        self.assertEqual(recipe.tags.count(), 2)
+        self.assertIn(tag_indian, recipe.tags.all())

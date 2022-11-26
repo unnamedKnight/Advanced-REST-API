@@ -3,9 +3,10 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.mixins import ListModelMixin, UpdateModelMixin, DestroyModelMixin
 
-from .models import Recipe
-from .serializers import RecipeSerializer, RecipeDetailsSerializer
+from .models import Recipe, Tag
+from .serializers import RecipeSerializer, RecipeDetailsSerializer, TagSerializer
 
 # Create your views here.
 
@@ -37,5 +38,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # return super().perform_create(serializer)
 
 
+class TagViewSet(
+    DestroyModelMixin, UpdateModelMixin, ListModelMixin, viewsets.GenericViewSet
+):
+    """Manage tags in the database"""
 
+    serializer_class = TagSerializer
+    queryset = Tag.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Tag.objects.filter(user=self.request.user).order_by("-title")
