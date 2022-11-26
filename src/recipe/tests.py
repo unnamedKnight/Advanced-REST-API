@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from .models import Recipe
+from .models import Recipe, Tag
 from .serializers import RecipeSerializer, RecipeDetailsSerializer
 
 # Create your tests here.
@@ -23,12 +23,11 @@ def detail_url(recipe_id):
     return reverse("recipe:recipe-detail", kwargs={"pk": recipe_id})
 
 
-def create_user(self):
-    username = "user@example.com"
-    password = "password123"
-    user = get_user_model().objects.create(email=username, password=password)
+def create_user(email="user@example.com", password="password123"):
+    user = get_user_model().objects.create(email=email, password=password)
     user.set_password(user.password)
-    self.user = user
+    return user
+
 
 
 def create_recipe(user, **params):  # sourcery skip: dict-assign-update-to-union
@@ -107,10 +106,24 @@ class PrivateRecipeAPITests(TestCase):
 
         }
         response = self.client.post(RECIPE_LIST, payload)
-        print(f"this is create recipe response {response}")
         recipe = Recipe.objects.get(id=response.data.get('id'))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         for key, value in payload.items():
             # comparing the value of recipe with the key of payload
             self.assertEqual((getattr(recipe, key)), value)
         self.assertEqual(recipe.user, self.user)
+
+
+
+class TagAPITests(TestCase):
+
+    def setUp(self) -> None:
+        self.user = create_user()
+        self.client = APIClient()
+
+    def test_create_tag(self):
+        title = "example tag1"
+        user = self.user
+        tag = Tag.objects.create(user=user, title=title)
+        self.assertEqual(tag.title, title)
+
