@@ -23,12 +23,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Returns the serializer class for request"""
-        # here self.acton means the operations we can perform using ModelSerializer
+        # here self.action means the operations we can perform using ModelSerializer
         # for example ['list', 'retrieve', 'create', 'update', 'destroy']
         # if self.action == "list":
         #     return RecipeSerializer
         # return self.serializer_class
-        # another implementation of the if self.action == 'list' expression
+        # another implementation of the above if self.action == 'list' expression is
         return RecipeSerializer if self.action == "list" else self.serializer_class
+
+    def perform_create(self, serializer):
+        """Create a new Recipe"""
+        serializer.save(user=self.request.user)
+        # return super().perform_create(serializer)
+
+
 
 
