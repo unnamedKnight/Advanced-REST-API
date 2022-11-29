@@ -74,3 +74,17 @@ class PrivateIngredientAPITests(TestCase):
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["name"], ingredient.name)
         self.assertEqual(response.data[0]["id"], ingredient.id)
+
+    def test_update_ingredient(self):
+        """Test updating an ingredient"""
+        ingredient = Ingredient.objects.create(user=self.user, name="Cilantro")
+
+        payload = {"name": "Coriander"}
+
+        url = detail_url(ingredient.id)
+        response = self.client.patch(url, payload)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ingredient.refresh_from_db()
+        self.assertEqual(ingredient.name, payload["name"])
+
+    

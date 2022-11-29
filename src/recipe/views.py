@@ -6,7 +6,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import ListModelMixin, UpdateModelMixin, DestroyModelMixin
 
 from .models import Recipe, Tag, Ingredient
-from .serializers import RecipeSerializer, RecipeDetailsSerializer, TagSerializer, IngredientSerializer
+from .serializers import (
+    RecipeSerializer,
+    RecipeDetailsSerializer,
+    TagSerializer,
+    IngredientSerializer,
+)
 
 # Create your views here.
 
@@ -38,36 +43,33 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # return super().perform_create(serializer)
 
 
-class TagViewSet(
+class BaseRecipeAttrViewSet(
     DestroyModelMixin, UpdateModelMixin, ListModelMixin, viewsets.GenericViewSet
 ):
+    """BaseViewSet for Recipe attributes"""
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+
+class TagViewSet(BaseRecipeAttrViewSet):
     """Manage tags in the database"""
 
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Tag.objects.filter(user=self.request.user).order_by("-title")
 
 
-class IngredientViewSet(ListModelMixin, viewsets.GenericViewSet):
+class IngredientViewSet(BaseRecipeAttrViewSet):
     """Manage ingredients in the database."""
+
+    # UpdateModelMixin checks if the current user is the owner of the
+    # model instance automatically
+
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """Filter queryset to authenticate user."""
         return self.queryset.filter(user=self.request.user).order_by("-name")
-
-
-
-
-
-
-
-
-

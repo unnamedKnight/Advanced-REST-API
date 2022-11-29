@@ -35,7 +35,6 @@ class PublicUserApiTests(TestCase):
         }
         # here payload is the content that is posted to the url
         response = self.client.post(CREATE_USER_API, payload)
-        print(response.data)
         # check status code
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # validating that the user object is created with the payload credentials
@@ -64,5 +63,5 @@ class PublicUserApiTests(TestCase):
         # email=test@example.com, password=testpassword123
         create_user(**payload1)
         response = self.client.post(CREATE_USER_API, payload2)
-        print(response.data)
+        print(f"response data -->{response.data}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
