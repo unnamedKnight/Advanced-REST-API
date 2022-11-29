@@ -50,3 +50,24 @@ class TagViewSet(
 
     def get_queryset(self):
         return Tag.objects.filter(user=self.request.user).order_by("-title")
+
+
+class IngredientViewSet(ListModelMixin, viewsets.GenericViewSet):
+    """Manage ingredients in the database."""
+    serializer_class = IngredientSerializer
+    queryset = Ingredient.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Filter queryset to authenticate user."""
+        return self.queryset.filter(user=self.request.user).order_by("-name")
+
+
+
+
+
+
+
+
+

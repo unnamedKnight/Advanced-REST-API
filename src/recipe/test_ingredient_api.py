@@ -16,7 +16,7 @@ from .serializers import (
 )
 
 
-INGREDIENT_URL = reverse("ingredient-list")
+INGREDIENT_URL = reverse("recipe:ingredient-list")
 
 
 def detail_url(ingredient_id):
