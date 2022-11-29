@@ -1,6 +1,13 @@
 from rest_framework import serializers
 
-from .models import Recipe, Tag
+from .models import Recipe, Tag, Ingredient
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = ("id", "name")
+        read_only_fields = ("id",)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -24,7 +31,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         for tag in tags:
             # by passing tag as **tag, we are passing all the fields of tag
             # an example of passing **tag is
-            #tag_obj, created = Tag.objects.get_or_create(user=authenticated_user, **tag)
+            # tag_obj, created = Tag.objects.get_or_create(user=authenticated_user, **tag)
 
             # but this is case sensitive
             # which means if there are two tags with the same title

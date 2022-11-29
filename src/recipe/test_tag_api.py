@@ -14,10 +14,10 @@ from .serializers import RecipeSerializer, RecipeDetailsSerializer, TagSerialize
 TAG_URL = reverse("recipe:tag-list")
 
 
-def detail_url(recipe_id):
+def detail_url(tag_id):
     "Create and return a recipe detail URL."
     # return reverse('recipe:recipe-detail', args=(recipe_id,))
-    return reverse("recipe:recipe-detail", kwargs={"pk": recipe_id})
+    return reverse("recipe:recipe-detail", kwargs={"pk": tag_id})
 
 
 def create_user(email="user@example.com", password="password123"):

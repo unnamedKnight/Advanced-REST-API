@@ -55,7 +55,7 @@ def create_recipe(user, **params):  # sourcery skip: dict-assign-update-to-union
 
 
 class PublicRecipeAPITests(TestCase):
-    "Test unauthenticated API requests."
+    """Test unauthenticated API requests."""
 
     def setUp(self) -> None:
         self.client = APIClient()
@@ -67,7 +67,7 @@ class PublicRecipeAPITests(TestCase):
 
 
 class PrivateRecipeAPITests(TestCase):
-    """Test unauthenticated API requests"""
+    """Test authenticated API requests"""
 
     def setUp(self):
         self.client = APIClient()

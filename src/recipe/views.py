@@ -5,8 +5,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import ListModelMixin, UpdateModelMixin, DestroyModelMixin
 
-from .models import Recipe, Tag
-from .serializers import RecipeSerializer, RecipeDetailsSerializer, TagSerializer
+from .models import Recipe, Tag, Ingredient
+from .serializers import RecipeSerializer, RecipeDetailsSerializer, TagSerializer, IngredientSerializer
 
 # Create your views here.
 
