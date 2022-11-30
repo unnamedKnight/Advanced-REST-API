@@ -1,7 +1,21 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+import uuid
+import os
 
 # Create your models here.
+
+def recipe_image_file_path(instance, filename):
+    # here instance refers to an instance of the Recipe Model
+    """Generate file path for new recipe image."""
+    # with the following statement
+    # we are removing the extension from the filename
+    # splitext is a function of path module
+    # which extracts the extension of a given filename
+    ext = os.path.splitext(filename)[1]
+    filename = f"{uuid.uuid4()}{ext}"
+    return os.path.join("uploads", "recipe", filename)
+
 
 class Recipe(models.Model):
 
@@ -13,9 +27,10 @@ class Recipe(models.Model):
     link = models.CharField(max_length=255, blank=True)
     tags = models.ManyToManyField("Tag")
     ingredients = models.ManyToManyField("Ingredient")
+    image = models.ImageField(null=True, upload_to=recipe_image_file_path)
 
     def __str__(self):
-        return (f"{self.title} + {self.id}")
+        return (f"{self.title} -----> {self.id}")
 
 
 class Tag(models.Model):
