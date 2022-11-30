@@ -37,6 +37,7 @@ def create_user(email="user@example.com", password="password123"):
     user.set_password(user.password)
     return user
 
+
 def image_upload_url(recipe_id):
     """Create and return an image upload URL."""
     return reverse("recipe:recipe-upload-image", args=[recipe_id])
@@ -235,15 +236,59 @@ class PrivateRecipeAPITests(TestCase):
 
     def test_update_recipe_assign_ingredient(self):
         """Test assigning an existing ingredient when updating a recipe."""
-        ingredient1=Ingredient.objects.create(user=self.user, name="Pepper")
+        ingredient1 = Ingredient.objects.create(user=self.user, name="Pepper")
         recipe = create_recipe(user=self.user)
         recipe.ingredients.add(ingredient1)
-        ingredient2=Ingredient.objects.create(user=self.user, name="Chili")
+        ingredient2 = Ingredient.objects.create(user=self.user, name="Chili")
         payload = {"ingredients": [{"name": "Chili"}]}
         url = detail_url(recipe.id)
         response = self.client.patch(url, payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(ingredient2, recipe.ingredients.all())
+
+    def test_filter_by_tags(self):
+        """Filtering recipes by tags."""
+        recipe1 = create_recipe(user=self.user, title="Thai vegetable Curry")
+        recipe2 = create_recipe(user=self.user, title="Aubergine with Tahini")
+        tag1 = Tag.objects.create(user=self.user, title="Vegan")
+        tag2 = Tag.objects.create(user=self.user, title="Vegetarian")
+        recipe1.tags.add(tag1)
+        recipe2.tags.add(tag1)
+        recipe3 = create_recipe(user=self.user, title="Fish and Chips")
+
+        params = {"tags": f"{tag1.id}, {tag2.id}"}
+        response = self.client.get(RECIPE_LIST, params)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        s1 = RecipeSerializer(recipe1)
+        s2 = RecipeSerializer(recipe2)
+        s3 = RecipeSerializer(recipe3)
+
+        self.assertIn(s1.data, response.data)
+        self.assertIn(s2.data, response.data)
+        self.assertNotIn(s3.data, response.data)
+
+    def test_filter_by_ingredients(self):
+        """Filtering recipes by ingredients."""
+        recipe1 = create_recipe(user=self.user, title="Posh Beans on Toast")
+        recipe2 = create_recipe(user=self.user, title="Chicken Cacciatore")
+        ingredient1 = Ingredient.objects.create(user=self.user, name="Feta Cheese")
+        ingredient2 = Ingredient.objects.create(user=self.user, name="Chicken")
+        recipe1.ingredients.add(ingredient1)
+        recipe2.ingredients.add(ingredient2)
+        recipe3 = create_recipe(user=self.user, title="Fish and Chips")
+        params = {"ingredients": f"{ingredient1.id}, {ingredient2.id}"}
+        response = self.client.get(RECIPE_LIST, params)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        s1 = RecipeSerializer(recipe1)
+        s2 = RecipeSerializer(recipe2)
+        s3 = RecipeSerializer(recipe3)
+
+        self.assertIn(s1.data, response.data)
+        self.assertIn(s2.data, response.data)
+        self.assertNotIn(s3.data, response.data)
+
 
 
 class ImageUploadTests(TestCase):
@@ -255,10 +300,8 @@ class ImageUploadTests(TestCase):
         self.client.force_authenticate(self.user)
         self.recipe = create_recipe(user=self.user)
 
-
     def tearDown(self) -> None:
         self.recipe.image.delete()
-
 
     def test_upload_image(self):
         """Test uploading an image to a recipe."""
